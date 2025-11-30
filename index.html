@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 AstroPlan v4.1 ULTIMATE</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" type="image/png" href="icon-192.png">
+
+    <style>
+        :root {
+            --bg: #05010b;
+            --bg-alt: #0b0616;
+            --accent: #7c4dff;
+            --accent-soft: rgba(124,77,255,0.15);
+            --text: #ffffff;
+            --text-muted: #a0a0c0;
+            --danger: #ff5252;
+            --ok: #4caf50;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at top, #1a0936 0, #05010b 55%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            padding: 12px 16px 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        header h1 span.logo {
+            font-size: 1.4rem;
+        }
+        header small {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .chip {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            border: 1px solid var(--accent);
+            background: var(--accent-soft);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        main {
+            padding: 4px 12px 72px;
+        }
+        .section-title {
+            margin: 10px 4px 4px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(24,18,66,0.95), rgba(10,3,30,0.98));
+            border-radius: 14px;
+            padding: 10px;
+            border: 1px solid rgba(124,77,255,0.25);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .card-title {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-title span.emoji {
+            font-size: 1rem;
+        }
+        .pill {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-muted);
+        }
+        .highlight {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        .meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .meta strong {
+            color: var(--text);
+        }
+
+        .tabs {
+            display: flex;
+            margin: 10px 0 4px;
+            background: rgba(10,3,30,0.9);
+            border-radius: 999px;
+            padding: 3px;
+            border: 1px solid rgba(124,77,255,0.35);
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 0.75rem;
+            border-radius: 999px;
+            color: var(--text-muted);
+        }
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .panel {
+            background: linear-gradient(135deg, rgba(14,7,40,0.98), rgba(5,2,20,0.98));
+            border-radius: 16px;
+            border: 1px solid rgba(124,77,255,0.4);
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .field-label {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+        select, button, input[type="number"] {
+            width: 100%;
+            padding: 7px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(124,77,255,0.5);
+            background: rgba(0,0,0,0.4);
+            color: var(--text);
+            font-size: 0.8rem;
+            outline: none;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent);
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .col {
+            flex: 1;
+        }
+
+        .params {
+            font-size: 0.78rem;
+            margin-top: 4px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 6px 8px;
+        }
+        .params strong {
+            color: var(--accent);
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .step {
+            display: flex;
+            gap: 6px;
+            align-items: flex-start;
+            font-size: 0.75rem;
+        }
+        .step-num {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        .step-text strong {
+            display: block;
+        }
+
+        .camera-preview {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            aspect-ratio: 4/3;
+            margin-top: 6px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .camera-overlay {
+            position: absolute;
+            inset: 0;
+            border: 1px dashed rgba(255,255,255,0.4);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        .camera-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c4dff, #b388ff);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+        }
+        .btn-secondary {
+            background: rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 6px 10px;
+            background: radial-gradient(circle at top, rgba(124,77,255,0.25), rgba(0,0,0,0.95));
+            border-top: 1px solid rgba(124,77,255,0.4);
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .footer button {
+            font-size: 0.8rem;
+        }
+
+        .badge-ok { color: var(--ok); font-size: 0.75rem; }
+        .badge-bad { color: var(--danger); font-size: 0.75rem; }
+
+        .toggle-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 0.75rem;
+        }
+        .toggle {
+            width: 32px;
+            height: 18px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.15);
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.2s ease;
+        }
+        .toggle.on {
+            background: var(--accent);
+        }
+        .toggle.on .toggle-knob {
+            transform: translateX(14px);
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1><span class="logo">🌌</span>AstroPlan <small>v4.1</small></h1>
+        <small>Asistente para tu Redmi Note 13 Pro 5G</small>
+    </div>
+    <div class="chip">
+        📶 PWA &nbsp;|&nbsp; 📷 Cámara básica
+    </div>
+</header>
+
+<main>
+    <p class="section-title">Inicio rápido</p>
+    <div class="card-grid">
+        <div class="card" id="cardTonight">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="emoji">🌃</span>Esta noche
+                </div>
+                <span class="pill" id="skyQualityTag">Bortle 5 aprox.</span>
+            </div>
+            <div class="highlight" id="tonightSummary">
+                Ventana Vía Láctea: 22:10–00:30 aprox.
+            </div>
+            <div class="meta">
+                Luna: <strong id="moonInfo">38% / se pone 21:45</strong><br>
+                Recomendación: <span id="tonightTip">Cielo decente, usa ISO medio y varias tomas.</span>
+            </div>
+        </div>
+
+        <div class="card" id="cardObject">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="emoji">🎯</span>Objeto objetivo
+                </div>
+                <span class="pill" id="objectTypeTag">Cielo profundo</span>
+            </div>
+            <div class="highlight" id="objectNameLabel">
+                Vía Láctea central
+            </div>
+            <div class="meta">
+                Mejor hora: <strong id="bestTimeLabel">23:15–01:00</strong><br>
+                Altura: <span id="altitudeLabel">+45° S</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" id="tabPlan">Planificar</div>
+        <div class="tab" id="tabCapture">Capturar</div>
+        <div class="tab" id="tabSession">Sesión</div>
+    </div>
+
+    <!-- Panel Planificar -->
+    <section class="panel" id="panelPlan">
+        <div class="field">
+            <div class="field-label">Objeto a fotografiar</div>
+            <select id="objectSelect">
+                <optgroup label="Cielo profundo">
+                    <option value="milkyway" selected>Vía Láctea (paisaje)</option>
+                    <option value="andromeda">Galaxia de Andrómeda (M31)</option>
+                    <option value="orion">Nebulosa de Orión (M42)</option>
+                    <option value="pleiades">Pléyades (M45)</option>
+                </optgroup>
+                <optgroup label="Sistema solar">
+                    <option value="moon">Luna (detalles)</option>
+                    <option value="moonWide">Luna (paisaje)</option>
+                    <option value="jupiter">Júpiter</option>
+                    <option value="saturn">Saturno</option>
+                    <option value="mars">Marte</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="row" style="margin-top:6px;">
+            <div class="col">
+                <div class="field-label">Nivel de cielo (Bortle aprox.)</div>
+                <select id="bortleSelect">
+                    <option value="3">3 (muy oscuro)</option>
+                    <option value="4">4 (rural)</option>
+                    <option value="5" selected>5 (semi-rural)</option>
+                    <option value="6">6 (periurbano)</option>
+                    <option value="7">7 (urbano)</option>
+                </select>
+            </div>
+            <div class="col">
+                <div class="field-label">Tolerancia de trailing (%)</div>
+                <input type="number" id="trailingInput" min="1" max="15" value="5">
+            </div>
+        </div>
+
+        <div class="params" id="paramsBox">
+            <div><strong>Parámetros sugeridos para tu Redmi:</strong></div>
+            <div id="paramsText">
+                Vía Láctea · ISO 1600–3200 · 15–20 s · f/1.65 (máxima apertura) · 20–40 fotos para apilado.
+            </div>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                    <strong>Preparar</strong>
+                    <span id="step1Text">
+                        Usa trípode, modo avión, brillo al mínimo, enfoca a infinito con toque manual si tu app lo permite.
+                    </span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                    <strong>Encadrar</strong>
+                    <span id="step2Text">
+                        Apunta hacia el sur/se-suroeste donde la Vía Láctea esté más alta entre 22:00 y 01:00, evitando luces directas.
+                    </span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                    <strong>Disparar</strong>
+                    <span id="step3Text">
+                        Usa temporizador 3–5 s, dispara ráfagas de 20–40 fotos con los mismos parámetros para apilar luego.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toggle-line">
+            <span>Modo luz roja (noche)</span>
+            <div class="toggle" id="redModeToggle">
+                <div class="toggle-knob"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panel Capturar -->
+    <section class="panel" id="panelCapture" style="display:none;">
+        <div class="field-label">Modo de captura</div>
+        <select id="captureMode">
+            <option value="guided" selected>Captura guiada (wizard)</option>
+            <option value="preview">Solo previsualizar cámara</option>
+        </select>
+
+        <div class="camera-preview" id="cameraContainer">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <div class="camera-overlay"></div>
+        </div>
+        <div class="camera-status" id="cameraStatus">
+            Toca “Iniciar cámara” para encuadrar tu objeto. La app no guarda fotos, solo ayuda a encuadrar.
+        </div>
+
+        <div class="params" style="margin-top:8px;">
+            <div><strong>Recordatorio de parámetros:</strong></div>
+            <div id="paramsCaptureText">
+                Vía Láctea · Modo Pro en tu cámara · ISO 1600–3200 · 15–20 s · enfoque manual a infinito.
+            </div>
+        </div>
+
+        <div class="steps" style="margin-top:8px;">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                    <strong>Preparar teléfono</strong>
+                    <span id="capStep1Text">
+                        Coloca el Redmi en trípode, activa modo avión, desactiva brillo automático y limpia la lente trasera.
+                    </span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                    <strong>Ajustar cámara nativa</strong>
+                    <span id="capStep2Text">
+                        Abre la app de cámara del teléfono, modo Pro/Manual, pon el tiempo sugerido, ISO recomendado y enfoque en ∞.
+                    </span>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                    <strong>Disparar secuencia</strong>
+                    <span id="capStep3Text">
+                        Usa temporizador de 3–5 s y toma el número de fotos sugeridas para apilar después.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panel Sesión -->
+    <section class="panel" id="panelSession" style="display:none;">
+        <div class="field-label">Resumen rápido de sesión</div>
+        <div class="params">
+            <div><strong>Objeto:</strong> <span id="sessionObject">Vía Láctea</span></div>
+            <div><strong>Parámetros usados (manual):</strong></div>
+            <div id="sessionParamsText">
+                ISO 1600, 15 s, 32 fotos, Bortle 5, trípode + temporizador.
+            </div>
+            <div style="margin-top:4px;">
+                Calidad esperada: <span class="badge-ok" id="sessionQuality">Buena si apilas y editas el RAW/JPEG.</span>
+            </div>
+        </div>
+        <div class="field" style="margin-top:6px;">
+            <div class="field-label">Notas de la sesión (puedes escribir y se guardan localmente)</div>
+            <textarea id="sessionNotes" rows="4" style="width:100%;border-radius:10px;border:1px solid rgba(124,77,255,0.5);background:rgba(0,0,0,0.4);color:#fff;font-size:0.78rem;padding:6px;resize:vertical;"></textarea>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <button class="btn-secondary" id="btnStartCamera">Iniciar cámara</button>
+    <button class="btn-primary" id="btnInstall">Instalar app</button>
+</footer>
+
+<script>
+    // Datos de configuración por objeto (pensados para tu Redmi gran angular ~24mm eq.)
+    const objectPresets = {
+        milkyway: {
+            name: "Vía Láctea (paisaje)",
+            type: "Cielo profundo",
+            bortleAdjust: true,
+            paramsText: "ISO 1600–3200 · 15–20 s · f/1.65 (máxima apertura) · 20–40 fotos para apilado.",
+            captureText: "Vía Láctea · Modo Pro · ISO 1600–3200 · 15–20 s · enfoque manual a infinito.",
+            steps: {
+                s1: "Usa trípode, modo avión y brillo mínimo. En tu Redmi, usa la cámara principal con la apertura más luminosa.",
+                s2: "Apunta hacia el sur/se-suroeste donde la banda de la Vía Láctea esté más alta entre 22:00 y 01:00, evitando luces directas.",
+                s3: "Temporizador 3–5 s, 20–40 fotos con los mismos parámetros para apilarlas luego en software."
+            }
+        },
+        andromeda: {
+            name: "Galaxia de Andrómeda (M31)",
+            type: "Cielo profundo",
+            bortleAdjust: true,
+            paramsText: "ISO 3200–6400 · 10–15 s · f/1.65 · mínimo 40–80 fotos para apilado.",
+            captureText: "Andrómeda · Modo Pro · ISO 3200–6400 · 10–15 s · mayor número posible de tomas.",
+            steps: {
+                s1: "Trípode estable, modo avión y revisa que no haya vibraciones por viento.",
+                s2: "Localiza Andrómeda al noreste/norte usando una app de planetario y centra la galaxia en el encuadre.",
+                s3: "Dispara 40–80 fotos con temporizador. Acepta algo de ruido, se mitigará al apilar."
+            }
+        },
+        orion: {
+            name: "Nebulosa de Orión (M42)",
+            type: "Cielo profundo",
+            bortleAdjust: true,
+            paramsText: "ISO 1600–3200 · 5–10 s · f/1.65 · 30–60 fotos.",
+            captureText: "Orión · Modo Pro · ISO 1600–3200 · 5–10 s · muchas tomas para captar detalle.",
+            steps: {
+                s1: "Trípode y lente limpia. Mejor cuando Orión está alto en el cielo (medianoche–madrugada).",
+                s2: "Encuadra el cinturón de Orión y baja un poco para incluir la nebulosa en el centro del encuadre.",
+                s3: "Toma 30–60 fotos cortas para evitar saturar el núcleo, ideal para apilado HDR."
+            }
+        },
+        pleiades: {
+            name: "Pléyades (M45)",
+            type: "Cielo profundo",
+            bortleAdjust: true,
+            paramsText: "ISO 1600–3200 · 10–15 s · f/1.65 · 30–60 fotos.",
+            captureText: "Pléyades · ISO 1600–3200 · 10–15 s · busca equilibrio entre detalle y no quemar estrellas.",
+            steps: {
+                s1: "Busca un cielo lo más oscuro posible (Bortle 3–4 ideal).",
+                s2: "Apunta hacia el cúmulo, enfoca manual a infinito y trata de centrar el racimo en el encuadre.",
+                s3: "Captura 30–60 fotos con temporizador para apilar y mejorar contraste."
+            }
+        },
+        moon: {
+            name: "Luna (detalles con zoom/telescopio)",
+            type: "Luna / planetas",
+            bortleAdjust: false,
+            paramsText: "ISO 100–400 · 1/125–1/500 s · f/1.65–f/2.4 según lente · 10–30 fotos.",
+            captureText: "Luna · ISO bajo · tiempo de exposición corto (1/125–1/500 s) · evita sobreexponer.",
+            steps: {
+                s1: "Usa trípode o apoyo firme, desactiva estabilización si está en trípode.",
+                s2: "Amplía con zoom óptico/moderado o usando adaptador a telescopio; enfoca con cuidado en el terminador.",
+                s3: "Toma varias fotos rápidas para seleccionar la más nítida o apilar para mejorar el detalle."
+            }
+        },
+        moonWide: {
+            name: "Luna + paisaje",
+            type: "Luna / paisaje",
+            bortleAdjust: false,
+            paramsText: "ISO 100–800 · 1/4–1/30 s · f/1.65 · una sola foto bien expuesta.",
+            captureText: "Luna con paisaje · equilibra exposición entre suelo y luna, quizás con HDR.",
+            steps: {
+                s1: "Busca una composición interesante con siluetas, montañas o edificios.",
+                s2: "Enfoca a la luna o en infinito y ajusta para no quemar la luna en exceso.",
+                s3: "Haz varias tomas probando diferentes tiempos y revisa histograma si tu app de cámara lo permite."
+            }
+        },
+        jupiter: {
+            name: "Júpiter",
+            type: "Planeta",
+            bortleAdjust: false,
+            paramsText: "ISO 400–800 · 1/15–1/60 s · zoom moderado · muchas fotos o vídeo para apilar.",
+            captureText: "Júpiter · tiempos cortos y muchas tomas. Mejor con telescopio + adaptador.",
+            steps: {
+                s1: "Usa adaptador a telescopio si tienes, o zoom óptico suave para no perder detalle.",
+                s2: "Centra Júpiter y ajusta enfoque al máximo contraste en las bandas.",
+                s3: "Captura muchas fotos o vídeo corto para apilar en software planetario."
+            }
+        },
+        saturn: {
+            name: "Saturno",
+            type: "Planeta",
+            bortleAdjust: false,
+            paramsText: "ISO 800–1600 · 1/15–1/60 s · telescopio recomendado · muchas tomas.",
+            captureText: "Saturno · requiere mucha focal; con móvil solo con telescopio se ve bien.",
+            steps: {
+                s1: "Acopla el móvil al ocular del telescopio con adaptador firme.",
+                s2: "Enfoca hasta ver anillos definidos y evita que el planeta se salga del campo.",
+                s3: "Graba vídeo o muchas tomas para apilar y mejorar señal/ruido."
+            }
+        },
+        mars: {
+            name: "Marte",
+            type: "Planeta",
+            bortleAdjust: false,
+            paramsText: "ISO 800–1600 · 1/30–1/125 s · telescopio preferible.",
+            captureText: "Marte · muy pequeño, mejor con telescopio y apilado.",
+            steps: {
+                s1: "Usa telescopio si es posible, con aumento moderado.",
+                s2: "Centra el disco de Marte y enfoca buscando el borde más nítido.",
+                s3: "Toma muchas tomas rápidas y apílalas para sacar detalle en el disco."
+            }
+        }
+    };
+
+    // Tabs
+    const tabPlan = document.getElementById('tabPlan');
+    const tabCapture = document.getElementById('tabCapture');
+    const tabSession = document.getElementById('tabSession');
+    const panelPlan = document.getElementById('panelPlan');
+    const panelCapture = document.getElementById('panelCapture');
+    const panelSession = document.getElementById('panelSession');
+
+    function setTab(tab) {
+        [tabPlan, tabCapture, tabSession].forEach(t => t.classList.remove('active'));
+        [panelPlan, panelCapture, panelSession].forEach(p => p.style.display = 'none');
+
+        if (tab === 'plan') {
+            tabPlan.classList.add('active');
+            panelPlan.style.display = 'block';
+        } else if (tab === 'capture') {
+            tabCapture.classList.add('active');
+            panelCapture.style.display = 'block';
+        } else {
+            tabSession.classList.add('active');
+            panelSession.style.display = 'block';
+        }
+    }
+
+    tabPlan.addEventListener('click', () => setTab('plan'));
+    tabCapture.addEventListener('click', () => setTab('capture'));
+    tabSession.addEventListener('click', () => setTab('session'));
+
+    // Objeto y Bortle
+    const objectSelect = document.getElementById('objectSelect');
+    const bortleSelect = document.getElementById('bortleSelect');
+    const trailingInput = document.getElementById('trailingInput');
+    const paramsText = document.getElementById('paramsText');
+    const paramsCaptureText = document.getElementById('paramsCaptureText');
+    const objectTypeTag = document.getElementById('objectTypeTag');
+    const objectNameLabel = document.getElementById('objectNameLabel');
+    const sessionObject = document.getElementById('sessionObject');
+    const sessionParamsText = document.getElementById('sessionParamsText');
+
+    const step1Text = document.getElementById('step1Text');
+    const step2Text = document.getElementById('step2Text');
+    const step3Text = document.getElementById('step3Text');
+
+    const capStep1Text = document.getElementById('capStep1Text');
+    const capStep2Text = document.getElementById('capStep2Text');
+    const capStep3Text = document.getElementById('capStep3Text');
+
+    const skyQualityTag = document.getElementById('skyQualityTag');
+    const tonightSummary = document.getElementById('tonightSummary');
+    const moonInfo = document.getElementById('moonInfo');
+    const tonightTip = document.getElementById('tonightTip');
+    const bestTimeLabel = document.getElementById('bestTimeLabel');
+    const altitudeLabel = document.getElementById('altitudeLabel');
+
+    function updatePreset() {
+        const key = objectSelect.value;
+        const preset = objectPresets[key] || objectPresets.milkyway;
+        const bortle = parseInt(bortleSelect.value || "5", 10);
+        const trailing = parseInt(trailingInput.value || "5", 10);
+
+        objectNameLabel.textContent = preset.name;
+        objectTypeTag.textContent = preset.type;
+        sessionObject.textContent = preset.name;
+
+        // Ajuste simple de texto según Bortle (solo a nivel de descripción, no cálculos complejos)
+        let params = preset.paramsText;
+        if (preset.bortleAdjust) {
+            if (bortle >= 6) {
+                params += " Cielo brillante: prioriza ISO alto y más tomas para apilado.";
+            } else if (bortle <= 4) {
+                params += " Cielo oscuro: puedes bajar algo el ISO para menos ruido.";
+            }
+        }
+        params += ` Tolerancia trailing: ${trailing}%.`;
+        paramsText.textContent = params;
+        paramsCaptureText.textContent = preset.captureText + ` Tolerancia trailing: ${trailing}%.`;
+        sessionParamsText.textContent = params;
+
+        // “Esta noche” muy simple (sin datos reales, solo texto guía)
+        if (key === "milkyway") {
+            tonightSummary.textContent = "Ventana Vía Láctea: 22:10–00:30 aprox. (orientación sur).";
+            bestTimeLabel.textContent = "23:15–01:00";
+            altitudeLabel.textContent = "+45° hacia el sur";
+            tonightTip.textContent = "Busca un lugar oscuro al sur, con horizonte despejado, y muchas tomas para apilar.";
+        } else if (key === "moon" || key === "moonWide") {
+            tonightSummary.textContent = "Luna visible gran parte de la noche.";
+            bestTimeLabel.textContent = "Alrededor del terminador";
+            altitudeLabel.textContent = "40–70° según hora";
+            tonightTip.textContent = "Aprovecha el terminador para más relieve, usa ISO bajo.";
+        } else {
+            tonightSummary.textContent = "Consulta app de planetario para posición precisa esta noche.";
+            bestTimeLabel.textContent = "Medianoche–madrugada";
+            altitudeLabel.textContent = "Varía según fecha y lugar";
+            tonightTip.textContent = "Cuanto más alto esté el objeto, mejor calidad de imagen.";
+        }
+
+        // Bortle texto
+        const bortleText = `Bortle ${bortle} aprox.`;
+        skyQualityTag.textContent = bortleText;
+        if (bortle <= 4) {
+            skyQualityTag.style.color = "#4caf50";
+        } else if (bortle === 5) {
+            skyQualityTag.style.color = "#ffc107";
+        } else {
+            skyQualityTag.style.color = "#ff5252";
+        }
+
+        // Pasos
+        step1Text.textContent = preset.steps.s1;
+        step2Text.textContent = preset.steps.s2;
+        step3Text.textContent = preset.steps.s3;
+        capStep1Text.textContent = preset.steps.s1;
+        capStep2Text.textContent = preset.steps.s2;
+        capStep3Text.textContent = preset.steps.s3;
+
+        // Nota de Luna (simulada)
+        if (key === "milkyway") {
+            moonInfo.textContent = "Luna: ideal si está por debajo del horizonte o en fase fina.";
+        } else if (key === "moon" || key === "moonWide") {
+            moonInfo.textContent = "Fase de la Luna: no importa tanto el cielo oscuro, importa la textura.";
+        } else {
+            moonInfo.textContent = "Mejor con Luna baja o nueva para objetos débiles.";
+        }
+
+        localStorage.setItem("astroplan:lastObject", key);
+        localStorage.setItem("astroplan:lastBortle", bortle.toString());
+        localStorage.setItem("astroplan:lastTrailing", trailing.toString());
+    }
+
+    objectSelect.addEventListener('change', updatePreset);
+    bortleSelect.addEventListener('change', updatePreset);
+    trailingInput.addEventListener('change', updatePreset);
+
+    // Notas de sesión (guardadas localmente)
+    const sessionNotes = document.getElementById('sessionNotes');
+    sessionNotes.addEventListener('input', () => {
+        localStorage.setItem("astroplan:sessionNotes", sessionNotes.value);
+    });
+
+    // Toggle modo rojo
+    const redModeToggle = document.getElementById('redModeToggle');
+    redModeToggle.addEventListener('click', () => {
+        const on = !redModeToggle.classList.contains('on');
+        redModeToggle.classList.toggle('on', on);
+        document.body.style.filter = on ? "hue-rotate(-140deg) saturate(1.2)" : "none";
+        localStorage.setItem("astroplan:redMode", on ? "1" : "0");
+    });
+
+    // Cámara básica con getUserMedia (solo vista previa)
+    const btnStartCamera = document.getElementById('btnStartCamera');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const videoEl = document.getElementById('cameraVideo');
+    let mediaStream = null;
+
+    async function startCamera() {
+        try {
+            if (mediaStream) {
+                // Alternar: si ya está, la paramos
+                mediaStream.getTracks().forEach(t => t.stop());
+                mediaStream = null;
+                videoEl.srcObject = null;
+                cameraStatus.textContent = "Cámara detenida. Toca de nuevo para iniciar.";
+                btnStartCamera.textContent = "Iniciar cámara";
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                cameraStatus.textContent = "Este navegador no permite usar la cámara desde la PWA.";
+                return;
+            }
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment"
+                },
+                audio: false
+            });
+            videoEl.srcObject = mediaStream;
+            cameraStatus.textContent = "Ajusta el encuadre aquí y luego dispara con la app de cámara nativa usando los parámetros sugeridos.";
+            btnStartCamera.textContent = "Detener cámara";
+        } catch (err) {
+            console.error(err);
+            cameraStatus.textContent = "No se pudo acceder a la cámara. Revisa permisos del navegador.";
+        }
+    }
+
+    btnStartCamera.addEventListener('click', () => {
+        setTab('capture');
+        startCamera();
+    });
+
+    // Botón Instalar app (capturamos beforeinstallprompt si es posible)
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById('btnInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        btnInstall.disabled = false;
+    });
+
+    btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === "accepted") {
+                btnInstall.textContent = "Instalada ✔";
+            } else {
+                btnInstall.textContent = "Instalar app";
+            }
+            deferredPrompt = null;
+        } else {
+            alert("Si no aparece el diálogo, usa el menú de Chrome → \"Instalar app\" o \"Añadir a pantalla\".");
+        }
+    });
+
+    // Service worker
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("service-worker.js").catch(console.error);
+        });
+    }
+
+    // Restaurar estado desde localStorage
+    function restoreState() {
+        const lastObj = localStorage.getItem("astroplan:lastObject");
+        const lastBortle = localStorage.getItem("astroplan:lastBortle");
+        const lastTrailing = localStorage.getItem("astroplan:lastTrailing");
+        const notes = localStorage.getItem("astroplan:sessionNotes");
+        const red = localStorage.getItem("astroplan:redMode");
+
+        if (lastObj && objectSelect.querySelector(`option[value="${lastObj}"]`)) {
+            objectSelect.value = lastObj;
+        }
+        if (lastBortle) {
+            bortleSelect.value = lastBortle;
+        }
+        if (lastTrailing) {
+            trailingInput.value = lastTrailing;
+        }
+        if (notes) {
+            sessionNotes.value = notes;
+        }
+        if (red === "1") {
+            redModeToggle.classList.add('on');
+            document.body.style.filter = "hue-rotate(-140deg) saturate(1.2)";
+        }
+
+        updatePreset();
+    }
+
+    restoreState();
+</script>
+</body>
+</html>

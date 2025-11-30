@@ -1,0 +1,17 @@
+{
+  "name": "AstroPlan v4.1 ULTIMATE",
+  "short_name": "AstroPlan",
+  "description": "Asistente de astrofotografía para tu Xiaomi Redmi Note 13 Pro 5G: planifica, captura y anota tus sesiones.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }  ]
+}
