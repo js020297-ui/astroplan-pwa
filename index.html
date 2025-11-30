@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌌 AstroPlan v4.1 ULTIMATE</title>
+    <title>🌌 AstroPlan v4.2 ULTIMATE</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
@@ -307,7 +307,7 @@
 <body>
 <header>
     <div>
-        <h1><span class="logo">🌌</span>AstroPlan <small>v4.1</small></h1>
+        <h1><span class="logo">🌌</span>AstroPlan <small>v4.2</small></h1>
         <small>Asistente para tu Redmi Note 13 Pro 5G</small>
     </div>
     <div class="chip">
@@ -359,7 +359,31 @@
 
     <!-- Panel Planificar -->
     <section class="panel" id="panelPlan">
-        <div class="field">
+        <div class="row">
+            <div class="col">
+                <div class="field-label">Ubicación</div>
+                <select id="locationSelect">
+                    <option value="pereira" selected>Pereira (Risaralda, CO)</option>
+                    <option value="cartago">Cartago (Valle, CO)</option>
+                    <option value="obando">Obando (Valle, CO)</option>
+                    <option value="juandiaz">Zona rural Juan Díaz (Valle, CO)</option>
+                    <option value="barcelona">Barcelona (España)</option>
+                    <option value="custom">Otra / personalizada</option>
+                </select>
+            </div>
+            <div class="col">
+                <div class="field-label">Nivel de cielo (Bortle)</div>
+                <select id="bortleSelect">
+                    <option value="3">3 (muy oscuro)</option>
+                    <option value="4">4 (rural)</option>
+                    <option value="5">5 (semi-rural)</option>
+                    <option value="6">6 (periurbano)</option>
+                    <option value="7">7 (urbano)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field" style="margin-top:4px;">
             <div class="field-label">Objeto a fotografiar</div>
             <select id="objectSelect">
                 <optgroup label="Cielo profundo">
@@ -379,16 +403,6 @@
         </div>
 
         <div class="row" style="margin-top:6px;">
-            <div class="col">
-                <div class="field-label">Nivel de cielo (Bortle aprox.)</div>
-                <select id="bortleSelect">
-                    <option value="3">3 (muy oscuro)</option>
-                    <option value="4">4 (rural)</option>
-                    <option value="5" selected>5 (semi-rural)</option>
-                    <option value="6">6 (periurbano)</option>
-                    <option value="7">7 (urbano)</option>
-                </select>
-            </div>
             <div class="col">
                 <div class="field-label">Tolerancia de trailing (%)</div>
                 <input type="number" id="trailingInput" min="1" max="15" value="5">
@@ -508,7 +522,7 @@
             </div>
         </div>
         <div class="field" style="margin-top:6px;">
-            <div class="field-label">Notas de la sesión (puedes escribir y se guardan localmente)</div>
+            <div class="field-label">Notas de la sesión (se guardan localmente)</div>
             <textarea id="sessionNotes" rows="4" style="width:100%;border-radius:10px;border:1px solid rgba(124,77,255,0.5);background:rgba(0,0,0,0.4);color:#fff;font-size:0.78rem;padding:6px;resize:vertical;"></textarea>
         </div>
     </section>
@@ -520,7 +534,47 @@
 </footer>
 
 <script>
-    // Datos de configuración por objeto (pensados para tu Redmi gran angular ~24mm eq.)
+    // Ubicaciones con Bortle y ventanas aproximadas (simplificado)
+    const locations = {
+        pereira: {
+            name: "Pereira",
+            bortle: 6,
+            milkywayWindow: "22:40–00:20",
+            deepSkyWindow: "23:30–02:00"
+        },
+        cartago: {
+            name: "Cartago",
+            bortle: 5,
+            milkywayWindow: "22:20–00:10",
+            deepSkyWindow: "23:00–02:00"
+        },
+        obando: {
+            name: "Obando",
+            bortle: 4,
+            milkywayWindow: "22:00–00:30",
+            deepSkyWindow: "22:30–02:30"
+        },
+        juandiaz: {
+            name: "Juan Díaz (rural)",
+            bortle: 3,
+            milkywayWindow: "21:40–00:40",
+            deepSkyWindow: "22:00–03:00"
+        },
+        barcelona: {
+            name: "Barcelona",
+            bortle: 7,
+            milkywayWindow: "00:30–03:00 (solo zonas muy oscuras fuera de la ciudad)",
+            deepSkyWindow: "01:00–03:30"
+        },
+        custom: {
+            name: "Ubicación personalizada",
+            bortle: 5,
+            milkywayWindow: "22:30–00:00",
+            deepSkyWindow: "23:00–02:00"
+        }
+    };
+
+    // Configuraciones por objeto
     const objectPresets = {
         milkyway: {
             name: "Vía Láctea (paisaje)",
@@ -530,8 +584,8 @@
             captureText: "Vía Láctea · Modo Pro · ISO 1600–3200 · 15–20 s · enfoque manual a infinito.",
             steps: {
                 s1: "Usa trípode, modo avión y brillo mínimo. En tu Redmi, usa la cámara principal con la apertura más luminosa.",
-                s2: "Apunta hacia el sur/se-suroeste donde la banda de la Vía Láctea esté más alta entre 22:00 y 01:00, evitando luces directas.",
-                s3: "Temporizador 3–5 s, 20–40 fotos con los mismos parámetros para apilarlas luego en software."
+                s2: "Apunta hacia el sur/se-suroeste donde la banda de la Vía Láctea esté más alta, evitando luces directas.",
+                s3: "Temporizador 3–5 s, 20–40 fotos para apilar luego en software."
             }
         },
         andromeda: {
@@ -539,11 +593,11 @@
             type: "Cielo profundo",
             bortleAdjust: true,
             paramsText: "ISO 3200–6400 · 10–15 s · f/1.65 · mínimo 40–80 fotos para apilado.",
-            captureText: "Andrómeda · Modo Pro · ISO 3200–6400 · 10–15 s · mayor número posible de tomas.",
+            captureText: "Andrómeda · Modo Pro · ISO 3200–6400 · 10–15 s · muchas tomas.",
             steps: {
-                s1: "Trípode estable, modo avión y revisa que no haya vibraciones por viento.",
-                s2: "Localiza Andrómeda al noreste/norte usando una app de planetario y centra la galaxia en el encuadre.",
-                s3: "Dispara 40–80 fotos con temporizador. Acepta algo de ruido, se mitigará al apilar."
+                s1: "Trípode estable, modo avión y sin vibraciones.",
+                s2: "Localiza Andrómeda al NE/N y céntrala con una app de planetario.",
+                s3: "Dispara 40–80 fotos cortas para apilar y mejorar señal/ruido."
             }
         },
         orion: {
@@ -551,11 +605,11 @@
             type: "Cielo profundo",
             bortleAdjust: true,
             paramsText: "ISO 1600–3200 · 5–10 s · f/1.65 · 30–60 fotos.",
-            captureText: "Orión · Modo Pro · ISO 1600–3200 · 5–10 s · muchas tomas para captar detalle.",
+            captureText: "Orión · ISO 1600–3200 · 5–10 s · muchas tomas cortas.",
             steps: {
-                s1: "Trípode y lente limpia. Mejor cuando Orión está alto en el cielo (medianoche–madrugada).",
-                s2: "Encuadra el cinturón de Orión y baja un poco para incluir la nebulosa en el centro del encuadre.",
-                s3: "Toma 30–60 fotos cortas para evitar saturar el núcleo, ideal para apilado HDR."
+                s1: "Trípode, lente limpia y Orión alto en el cielo (medianoche–madrugada).",
+                s2: "Encuadra el cinturón y baja un poco para incluir la nebulosa.",
+                s3: "Toma 30–60 fotos para evitar quemar el núcleo."
             }
         },
         pleiades: {
@@ -563,59 +617,59 @@
             type: "Cielo profundo",
             bortleAdjust: true,
             paramsText: "ISO 1600–3200 · 10–15 s · f/1.65 · 30–60 fotos.",
-            captureText: "Pléyades · ISO 1600–3200 · 10–15 s · busca equilibrio entre detalle y no quemar estrellas.",
+            captureText: "Pléyades · ISO 1600–3200 · 10–15 s · prioriza muchas tomas.",
             steps: {
-                s1: "Busca un cielo lo más oscuro posible (Bortle 3–4 ideal).",
-                s2: "Apunta hacia el cúmulo, enfoca manual a infinito y trata de centrar el racimo en el encuadre.",
-                s3: "Captura 30–60 fotos con temporizador para apilar y mejorar contraste."
+                s1: "Busca el cúmulo en un cielo lo más oscuro posible (Bortle 3–4 ideal).",
+                s2: "Centra el racimo de estrellas y enfoca a infinito.",
+                s3: "Captura 30–60 fotos con temporizador para apilar."
             }
         },
         moon: {
-            name: "Luna (detalles con zoom/telescopio)",
+            name: "Luna (detalles)",
             type: "Luna / planetas",
             bortleAdjust: false,
-            paramsText: "ISO 100–400 · 1/125–1/500 s · f/1.65–f/2.4 según lente · 10–30 fotos.",
-            captureText: "Luna · ISO bajo · tiempo de exposición corto (1/125–1/500 s) · evita sobreexponer.",
+            paramsText: "ISO 100–400 · 1/125–1/500 s · f/1.65–f/2.4 · 10–30 fotos.",
+            captureText: "Luna · ISO bajo · 1/125–1/500 s · evita sobreexponer.",
             steps: {
-                s1: "Usa trípode o apoyo firme, desactiva estabilización si está en trípode.",
-                s2: "Amplía con zoom óptico/moderado o usando adaptador a telescopio; enfoca con cuidado en el terminador.",
-                s3: "Toma varias fotos rápidas para seleccionar la más nítida o apilar para mejorar el detalle."
+                s1: "Usa trípode o apoyo firme y desactiva estabilización en trípode.",
+                s2: "Amplía con zoom óptico/moderado o telescopio; enfoca en el terminador.",
+                s3: "Haz varias fotos rápidas y elige la más nítida o apílalas."
             }
         },
         moonWide: {
             name: "Luna + paisaje",
             type: "Luna / paisaje",
             bortleAdjust: false,
-            paramsText: "ISO 100–800 · 1/4–1/30 s · f/1.65 · una sola foto bien expuesta.",
-            captureText: "Luna con paisaje · equilibra exposición entre suelo y luna, quizás con HDR.",
+            paramsText: "ISO 100–800 · 1/4–1/30 s · f/1.65 · una buena foto equilibrada.",
+            captureText: "Luna con paisaje · equilibra exposición entre suelo y luna, quizá HDR.",
             steps: {
-                s1: "Busca una composición interesante con siluetas, montañas o edificios.",
-                s2: "Enfoca a la luna o en infinito y ajusta para no quemar la luna en exceso.",
-                s3: "Haz varias tomas probando diferentes tiempos y revisa histograma si tu app de cámara lo permite."
+                s1: "Busca siluetas interesantes (árboles, montes, edificios).",
+                s2: "Enfoca a la luna o infinito, ajusta hasta no quemarla.",
+                s3: "Prueba varios tiempos y revisa que el suelo no quede totalmente negro."
             }
         },
         jupiter: {
             name: "Júpiter",
             type: "Planeta",
             bortleAdjust: false,
-            paramsText: "ISO 400–800 · 1/15–1/60 s · zoom moderado · muchas fotos o vídeo para apilar.",
-            captureText: "Júpiter · tiempos cortos y muchas tomas. Mejor con telescopio + adaptador.",
+            paramsText: "ISO 400–800 · 1/15–1/60 s · zoom moderado · muchas tomas o vídeo.",
+            captureText: "Júpiter · tiempos cortos, mejor con telescopio + adaptador.",
             steps: {
-                s1: "Usa adaptador a telescopio si tienes, o zoom óptico suave para no perder detalle.",
-                s2: "Centra Júpiter y ajusta enfoque al máximo contraste en las bandas.",
-                s3: "Captura muchas fotos o vídeo corto para apilar en software planetario."
+                s1: "Acopla el móvil al ocular si tienes telescopio, o usa zoom óptico suave.",
+                s2: "Centra el planeta y afina enfoque viendo las bandas.",
+                s3: "Captura muchas fotos o vídeo corto para apilar."
             }
         },
         saturn: {
             name: "Saturno",
             type: "Planeta",
             bortleAdjust: false,
-            paramsText: "ISO 800–1600 · 1/15–1/60 s · telescopio recomendado · muchas tomas.",
-            captureText: "Saturno · requiere mucha focal; con móvil solo con telescopio se ve bien.",
+            paramsText: "ISO 800–1600 · 1/15–1/60 s · telescopio recomendado.",
+            captureText: "Saturno · requiere mucha focal; móvil + telescopio.",
             steps: {
-                s1: "Acopla el móvil al ocular del telescopio con adaptador firme.",
-                s2: "Enfoca hasta ver anillos definidos y evita que el planeta se salga del campo.",
-                s3: "Graba vídeo o muchas tomas para apilar y mejorar señal/ruido."
+                s1: "Usa adaptador firme al telescopio.",
+                s2: "Enfoca hasta ver anillos bien definidos.",
+                s3: "Graba vídeos o muchas fotos para apilar."
             }
         },
         mars: {
@@ -623,11 +677,11 @@
             type: "Planeta",
             bortleAdjust: false,
             paramsText: "ISO 800–1600 · 1/30–1/125 s · telescopio preferible.",
-            captureText: "Marte · muy pequeño, mejor con telescopio y apilado.",
+            captureText: "Marte · muy pequeño, idealmente telescopio + apilado.",
             steps: {
-                s1: "Usa telescopio si es posible, con aumento moderado.",
-                s2: "Centra el disco de Marte y enfoca buscando el borde más nítido.",
-                s3: "Toma muchas tomas rápidas y apílalas para sacar detalle en el disco."
+                s1: "Telescopio con aumento moderado si es posible.",
+                s2: "Centra el disco y busca el borde más nítido.",
+                s3: "Muchas tomas rápidas para apilar."
             }
         }
     };
@@ -660,7 +714,8 @@
     tabCapture.addEventListener('click', () => setTab('capture'));
     tabSession.addEventListener('click', () => setTab('session'));
 
-    // Objeto y Bortle
+    // Elementos
+    const locationSelect = document.getElementById('locationSelect');
     const objectSelect = document.getElementById('objectSelect');
     const bortleSelect = document.getElementById('bortleSelect');
     const trailingInput = document.getElementById('trailingInput');
@@ -674,7 +729,6 @@
     const step1Text = document.getElementById('step1Text');
     const step2Text = document.getElementById('step2Text');
     const step3Text = document.getElementById('step3Text');
-
     const capStep1Text = document.getElementById('capStep1Text');
     const capStep2Text = document.getElementById('capStep2Text');
     const capStep3Text = document.getElementById('capStep3Text');
@@ -686,7 +740,32 @@
     const bestTimeLabel = document.getElementById('bestTimeLabel');
     const altitudeLabel = document.getElementById('altitudeLabel');
 
+    // Cámara
+    const btnStartCamera = document.getElementById('btnStartCamera');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const videoEl = document.getElementById('cameraVideo');
+    let mediaStream = null;
+
+    // Instalación
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById('btnInstall');
+
+    // Red mode
+    const redModeToggle = document.getElementById('redModeToggle');
+
+    // Notas sesión
+    const sessionNotes = document.getElementById('sessionNotes');
+
+    function applyLocationBortleFromPreset() {
+        const locKey = locationSelect.value;
+        const loc = locations[locKey] || locations.pereira;
+        // Solo cambiamos bortle automáticamente si el usuario no ha tocado nada en esta sesión
+        bortleSelect.value = loc.bortle.toString();
+    }
+
     function updatePreset() {
+        const locKey = locationSelect.value;
+        const loc = locations[locKey] || locations.pereira;
         const key = objectSelect.value;
         const preset = objectPresets[key] || objectPresets.milkyway;
         const bortle = parseInt(bortleSelect.value || "5", 10);
@@ -696,7 +775,6 @@
         objectTypeTag.textContent = preset.type;
         sessionObject.textContent = preset.name;
 
-        // Ajuste simple de texto según Bortle (solo a nivel de descripción, no cálculos complejos)
         let params = preset.paramsText;
         if (preset.bortleAdjust) {
             if (bortle >= 6) {
@@ -710,26 +788,31 @@
         paramsCaptureText.textContent = preset.captureText + ` Tolerancia trailing: ${trailing}%.`;
         sessionParamsText.textContent = params;
 
-        // “Esta noche” muy simple (sin datos reales, solo texto guía)
+        // Ventanas aproximadas según lugar + tipo de objeto
         if (key === "milkyway") {
-            tonightSummary.textContent = "Ventana Vía Láctea: 22:10–00:30 aprox. (orientación sur).";
-            bestTimeLabel.textContent = "23:15–01:00";
-            altitudeLabel.textContent = "+45° hacia el sur";
-            tonightTip.textContent = "Busca un lugar oscuro al sur, con horizonte despejado, y muchas tomas para apilar.";
+            tonightSummary.textContent = `Ventana Vía Láctea: ${loc.milkywayWindow}.`;
+            bestTimeLabel.textContent = loc.milkywayWindow;
+            altitudeLabel.textContent = "+40–60° hacia el sur (aprox.)";
+            tonightTip.textContent = "Busca el sector más oscuro hacia el sur y haz muchas tomas para apilar.";
+        } else if (preset.type === "Cielo profundo") {
+            tonightSummary.textContent = `Ventana cielo profundo: ${loc.deepSkyWindow}.`;
+            bestTimeLabel.textContent = loc.deepSkyWindow;
+            altitudeLabel.textContent = "Más alto cerca del meridiano (medianoche local).";
+            tonightTip.textContent = "Mientras más alto esté el objeto y más oscuro el cielo, mejor detalle.";
         } else if (key === "moon" || key === "moonWide") {
-            tonightSummary.textContent = "Luna visible gran parte de la noche.";
-            bestTimeLabel.textContent = "Alrededor del terminador";
-            altitudeLabel.textContent = "40–70° según hora";
-            tonightTip.textContent = "Aprovecha el terminador para más relieve, usa ISO bajo.";
+            tonightSummary.textContent = "Luna visible gran parte de la noche; prioriza el terminador.";
+            bestTimeLabel.textContent = "2–3 h después de salida o antes de puesta.";
+            altitudeLabel.textContent = "40–70° (según hora).";
+            tonightTip.textContent = "Mejor relieve cuando la Luna no está llena y ves sombras en el terminador.";
         } else {
-            tonightSummary.textContent = "Consulta app de planetario para posición precisa esta noche.";
-            bestTimeLabel.textContent = "Medianoche–madrugada";
-            altitudeLabel.textContent = "Varía según fecha y lugar";
-            tonightTip.textContent = "Cuanto más alto esté el objeto, mejor calidad de imagen.";
+            tonightSummary.textContent = "Planetas: mejor cuando estén altos sobre el horizonte.";
+            bestTimeLabel.textContent = "Cerca del tránsito (cuando culminan).";
+            altitudeLabel.textContent = "Varía según fecha y lugar.";
+            tonightTip.textContent = "Comprueba la altura del planeta en una app de planetario para la noche actual.";
         }
 
         // Bortle texto
-        const bortleText = `Bortle ${bortle} aprox.`;
+        const bortleText = `Bortle ${bortle} aprox. (${loc.name})`;
         skyQualityTag.textContent = bortleText;
         if (bortle <= 4) {
             skyQualityTag.style.color = "#4caf50";
@@ -751,28 +834,35 @@
         if (key === "milkyway") {
             moonInfo.textContent = "Luna: ideal si está por debajo del horizonte o en fase fina.";
         } else if (key === "moon" || key === "moonWide") {
-            moonInfo.textContent = "Fase de la Luna: no importa tanto el cielo oscuro, importa la textura.";
+            moonInfo.textContent = "Para Luna, la contaminación lumínica afecta menos; importa más la turbulencia.";
         } else {
             moonInfo.textContent = "Mejor con Luna baja o nueva para objetos débiles.";
         }
 
+        // Guardar estado
         localStorage.setItem("astroplan:lastObject", key);
         localStorage.setItem("astroplan:lastBortle", bortle.toString());
         localStorage.setItem("astroplan:lastTrailing", trailing.toString());
+        localStorage.setItem("astroplan:lastLocation", locKey);
     }
+
+    // Eventos
+    locationSelect.addEventListener('change', () => {
+        const locKey = locationSelect.value;
+        const loc = locations[locKey] || locations.pereira;
+        // Aplicar Bortle sugerido al cambiar de ubicación
+        bortleSelect.value = loc.bortle.toString();
+        updatePreset();
+    });
 
     objectSelect.addEventListener('change', updatePreset);
     bortleSelect.addEventListener('change', updatePreset);
     trailingInput.addEventListener('change', updatePreset);
 
-    // Notas de sesión (guardadas localmente)
-    const sessionNotes = document.getElementById('sessionNotes');
     sessionNotes.addEventListener('input', () => {
         localStorage.setItem("astroplan:sessionNotes", sessionNotes.value);
     });
 
-    // Toggle modo rojo
-    const redModeToggle = document.getElementById('redModeToggle');
     redModeToggle.addEventListener('click', () => {
         const on = !redModeToggle.classList.contains('on');
         redModeToggle.classList.toggle('on', on);
@@ -780,16 +870,9 @@
         localStorage.setItem("astroplan:redMode", on ? "1" : "0");
     });
 
-    // Cámara básica con getUserMedia (solo vista previa)
-    const btnStartCamera = document.getElementById('btnStartCamera');
-    const cameraStatus = document.getElementById('cameraStatus');
-    const videoEl = document.getElementById('cameraVideo');
-    let mediaStream = null;
-
     async function startCamera() {
         try {
             if (mediaStream) {
-                // Alternar: si ya está, la paramos
                 mediaStream.getTracks().forEach(t => t.stop());
                 mediaStream = null;
                 videoEl.srcObject = null;
@@ -803,9 +886,7 @@
                 return;
             }
             mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "environment"
-                },
+                video: { facingMode: "environment" },
                 audio: false
             });
             videoEl.srcObject = mediaStream;
@@ -821,10 +902,6 @@
         setTab('capture');
         startCamera();
     });
-
-    // Botón Instalar app (capturamos beforeinstallprompt si es posible)
-    let deferredPrompt = null;
-    const btnInstall = document.getElementById('btnInstall');
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -847,20 +924,25 @@
         }
     });
 
-    // Service worker
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
             navigator.serviceWorker.register("service-worker.js").catch(console.error);
         });
     }
 
-    // Restaurar estado desde localStorage
     function restoreState() {
         const lastObj = localStorage.getItem("astroplan:lastObject");
         const lastBortle = localStorage.getItem("astroplan:lastBortle");
         const lastTrailing = localStorage.getItem("astroplan:lastTrailing");
         const notes = localStorage.getItem("astroplan:sessionNotes");
         const red = localStorage.getItem("astroplan:redMode");
+        const lastLocation = localStorage.getItem("astroplan:lastLocation");
+
+        if (lastLocation && locations[lastLocation]) {
+            locationSelect.value = lastLocation;
+        }
+        // Aplica Bortle sugerido de la ubicación restaurada
+        applyLocationBortleFromPreset();
 
         if (lastObj && objectSelect.querySelector(`option[value="${lastObj}"]`)) {
             objectSelect.value = lastObj;
